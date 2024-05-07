@@ -8,8 +8,7 @@ import java.util.Set;
 public class AbsenceNoiseInjector implements NoiseInjector {
 
     @Override
-    public Trace injectNoise(Trace cleanTrace, int length) {
-        return null;
+    public void injectNoise(Trace cleanTrace, int length) {
     }
 
 }

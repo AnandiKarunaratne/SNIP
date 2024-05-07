@@ -7,19 +7,18 @@ import java.util.Set;
 
 public class UnrelatedActivityInserter extends InsertionNoiseInjector {
 
-    Set<String> activities;
-
     UnrelatedActivityInserter(Set<String> activities) {
         super(activities);
-        this.activities = activities;
     }
 
     @Override
-    Trace injectActivity(Trace cleanTrace, int insertIndex) {
-        Random random = new Random();
-        String insertActivity = generateRandomActivityName();
+    void injectActivity(Trace cleanTrace, int insertIndex) {
+        String insertActivity;
+        do {
+            insertActivity = generateRandomActivityName();
+        } while (activities.contains(insertActivity));
+
         cleanTrace.add(insertIndex, insertActivity);
-        return cleanTrace;
     }
 
     private String generateRandomActivityName() {
