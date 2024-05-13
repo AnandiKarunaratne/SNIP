@@ -22,8 +22,12 @@ public abstract class InsertionNoiseInjector implements NoiseInjector {
      */
     @Override
     public void injectNoise(Trace cleanTrace, int length) {
+        double probability = 0.5; // inserting activities consecutively or randomly has equal probability
+        injectNoise(cleanTrace, length, probability);
+    }
+
+    public void injectNoise(Trace cleanTrace, int length, double probability) {
         double methodDecider = Math.random();
-        double probability = 0.5;
         if (methodDecider < probability) {
             insertConsecutiveActivities(cleanTrace, length);
         } else {
@@ -31,12 +35,9 @@ public abstract class InsertionNoiseInjector implements NoiseInjector {
         }
     }
 
-    /**
-     * test this
-     */
     void insertConsecutiveActivities(Trace cleanTrace, int length) {
         Random random = new Random();
-        int startIndex = random.nextInt(cleanTrace.size() - length + 1); // recheck edge cases
+        int startIndex = random.nextInt(cleanTrace.size() + 1);
         for (int i = 0; i < length; i++) {
             injectActivity(cleanTrace, i + startIndex);
         }
