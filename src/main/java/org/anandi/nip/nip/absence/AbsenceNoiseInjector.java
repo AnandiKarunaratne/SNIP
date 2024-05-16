@@ -53,7 +53,7 @@ public class AbsenceNoiseInjector implements NoiseInjector {
     }
 
     protected void consecutiveActivityRemovalManager(Trace cleanTrace, int length) {
-        double probability = 1/3; // removing activities from head/tail/body has equal probability
+        double probability = 1.0 / 3; // removing activities from head/tail/body has equal probability
         double methodDecider = Math.random();
         if (methodDecider < probability) {
             removeHead(cleanTrace, length);
@@ -71,6 +71,9 @@ public class AbsenceNoiseInjector implements NoiseInjector {
     }
 
     protected void removeActivity(Trace cleanTrace, int removeIndex) {
+        if (removeIndex >= cleanTrace.size()) {
+            throw new IndexOutOfBoundsException("Index " + removeIndex + " is out of bounds for the trace size " + cleanTrace.size());
+        }
         cleanTrace.remove(removeIndex);
     }
 
