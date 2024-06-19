@@ -35,13 +35,18 @@ public abstract class InsertionNoiseInjector implements NoiseInjector {
         }
     }
 
-    void insertConsecutiveActivities(Trace cleanTrace, int length) {
+    public void insertConsecutiveActivities(Trace cleanTrace, int length) {
         Random random = new Random();
         int startIndex = random.nextInt(cleanTrace.size() + 1);
+        insertConsecutiveActivities(cleanTrace, length, startIndex);
+    }
+
+    public void insertConsecutiveActivities(Trace cleanTrace, int length, int startIndex) {
         for (int i = 0; i < length; i++) {
             injectActivity(cleanTrace, i + startIndex);
         }
     }
+
     void insertRandomActivities(Trace cleanTrace, int length) {
         Random random = new Random();
         int insertIndex;

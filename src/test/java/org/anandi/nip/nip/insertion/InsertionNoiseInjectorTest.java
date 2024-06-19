@@ -24,7 +24,7 @@ public class InsertionNoiseInjectorTest {
     }
 
     @Test
-    public void testInsertConsecutiveActivities() {
+    public void testInsertRandomConsecutiveActivities() {
         Random random = new Random();
         int length = random.nextInt(cleanTrace.size() / 3) + 1;
         processActivityInserter.insertConsecutiveActivities(cleanTrace, length);

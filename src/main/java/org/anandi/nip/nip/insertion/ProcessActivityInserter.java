@@ -7,12 +7,12 @@ import java.util.Set;
 
 public class ProcessActivityInserter extends InsertionNoiseInjector {
 
-    ProcessActivityInserter(Set<String> activities) {
+    public ProcessActivityInserter(Set<String> activities) {
         super(activities);
     }
 
     @Override
-    void injectActivity(Trace cleanTrace, int insertIndex) {
+    public void injectActivity(Trace cleanTrace, int insertIndex) {
         Random random = new Random();
 
         // Select a random activity from the activity set

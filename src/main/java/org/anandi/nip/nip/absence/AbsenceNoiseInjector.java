@@ -64,13 +64,13 @@ public class AbsenceNoiseInjector implements NoiseInjector {
         }
     }
 
-    protected void removeConsecutiveActivities(Trace cleanTrace, int length, int startIndex) {
+    public void removeConsecutiveActivities(Trace cleanTrace, int length, int startIndex) {
         for (int i = 0; i < length; i++) {
             removeActivity(cleanTrace, startIndex);
         }
     }
 
-    protected void removeActivity(Trace cleanTrace, int removeIndex) {
+    public void removeActivity(Trace cleanTrace, int removeIndex) {
         if (removeIndex >= cleanTrace.size()) {
             throw new IndexOutOfBoundsException("Index " + removeIndex + " is out of bounds for the trace size " + cleanTrace.size());
         }
