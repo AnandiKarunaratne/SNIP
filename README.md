@@ -86,7 +86,6 @@ java -jar NIP-<version>-jar-with-dependencies.jar <options>
    This command injects 15% absence noise and suppresses the output.
 
 ## Class Diagram
-
-![without-namespace](https://github.com/AnandiKarunaratne/NIP/assets/49262441/a1892457-3ea8-4b7b-bc55-8d4a9be4dd30)
+![output-onlinepngtools](https://github.com/AnandiKarunaratne/NIP/assets/49262441/7ea12fbe-4170-40cd-a4d0-4021a83b753a)
 
 ---
