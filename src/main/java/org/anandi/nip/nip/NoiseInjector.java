@@ -5,5 +5,6 @@ import org.anandi.nip.eventlog.Trace;
 public interface NoiseInjector {
 
     void injectNoise(Trace cleanTrace, int length);
+    void injectNoise(Trace cleanTrace, int length, double probability);
 
 }

@@ -13,12 +13,13 @@ public class AbsenceNoiseInjector implements NoiseInjector {
         injectNoise(cleanTrace, length, probability);
     }
 
+    @Override
     public void injectNoise(Trace cleanTrace, int length, double probability) {
         double methodDecider = Math.random();
         if (methodDecider < probability) {
             consecutiveActivityRemovalManager(cleanTrace, length);
         } else {
-            removeActivity(cleanTrace, length);
+            removeRandomActivities(cleanTrace, length);
         }
     }
 

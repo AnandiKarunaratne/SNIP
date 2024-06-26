@@ -6,6 +6,16 @@ import java.util.Random;
 
 public class ActivitySwapper extends OrderingNoiseInjector {
 
+    @Override
+    public void injectNoise(Trace cleanTrace, int length, double probability) {
+        double methodDecider = Math.random();
+        if (methodDecider < probability) {
+            swapActivities(cleanTrace, length);
+        } else {
+            swapAdjacentActivities(cleanTrace, length);
+        }
+    }
+
     public void swapActivities(Trace cleanTrace, int length, int index1, int index2) {
         if (cleanTrace.size() < 2 * length) {
             throw new IllegalArgumentException("The trace be longer than twice the length of the subtrace to swap.");
@@ -42,6 +52,15 @@ public class ActivitySwapper extends OrderingNoiseInjector {
         String temp = cleanTrace.get(index1);
         cleanTrace.set(index1, cleanTrace.get(index2));
         cleanTrace.set(index2, temp);
+    }
+
+    public void swapAdjacentActivities(Trace cleanTrace, int length) {
+        if (cleanTrace.size() < 2 * length) {
+            throw new IllegalArgumentException("The trace be longer than twice the length of the subtrace to swap.");
+        }
+        Random random = new Random();
+        int index = random.nextInt(cleanTrace.size() - length + 1);
+        swapAdjacentActivities(cleanTrace, length, index);
     }
 
     public void swapAdjacentActivities(Trace cleanTrace, int length, int index) {

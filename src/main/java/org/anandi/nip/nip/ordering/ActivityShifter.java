@@ -6,6 +6,16 @@ import java.util.Random;
 
 public class ActivityShifter extends OrderingNoiseInjector {
 
+    @Override
+    public void injectNoise(Trace cleanTrace, int length, double probability) {
+        double methodDecider = Math.random();
+        if (methodDecider < probability) {
+            shiftActivitiesToLeft(cleanTrace, length);
+        } else {
+            shiftActivitiesToRight(cleanTrace, length);
+        }
+    }
+
     public void shiftActivitiesToLeft(Trace cleanTrace, int length) {
         if (cleanTrace.size() < length) {
             throw new IllegalArgumentException("The trace should be longer than the length of the subtrace to be shifted.");

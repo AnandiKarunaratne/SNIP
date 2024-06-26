@@ -1,21 +1,85 @@
 package org.anandi.nip.eventlog;
 
+import org.deckfour.xes.factory.XFactory;
+import org.deckfour.xes.factory.XFactoryRegistry;
 import org.deckfour.xes.in.XParser;
 import org.deckfour.xes.in.XesXmlParser;
+import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class EventLogUtils {
 
-    public EventLog readXES(String filePath) {
-        EventLog eventLog = new EventLog();
+    public static List<String> getActivities(XLog log) {
+        List<String> activities = new ArrayList<>();
+        for (XTrace trace : log) {
+            for (XEvent event : trace) {
+                activities.add(event.getAttributes().get("concept:name").toString());
+            }
+        }
+        return activities;
+    }
 
+    public static Trace getTrace(XTrace trace) {
+        Trace traceList = new Trace();
+        for (XEvent event : trace) {
+            traceList.add(event.getAttributes().get("concept:name").toString());
+        }
+        return traceList;
+    }
+
+    public static EventLog getEventLog(XLog log) {
+        EventLog eventLog = new EventLog();
+        for (XTrace trace : log) {
+            eventLog.add(getTrace(trace));
+        }
+        return eventLog;
+    }
+
+    public EventLog readFile(String xesFile) {
+        XFactory factory = XFactoryRegistry.instance().currentDefault();
+        XParser parser = new XesXmlParser(factory);
+        EventLog eventLog = new EventLog();
+        try (FileInputStream fis = new FileInputStream(xesFile)) {
+            if (parser.canParse(new File(xesFile))) {
+                List<XLog> logs = parser.parse(fis);
+                if (!logs.isEmpty()) {
+                    XLog log = logs.get(0);
+
+                    // Get all activities
+                    List<String> activities = getActivities(log);
+                    System.out.println("Activities: " + activities);
+
+                    // Get the first trace
+                    if (!log.isEmpty()) {
+                        List<String> firstTrace = getTrace(log.get(0));
+                        System.out.println("First trace: " + firstTrace);
+                    }
+
+                    // Get the entire event log
+                    eventLog = getEventLog(log);
+                    System.out.println("Event log: " + eventLog);
+                }
+            } else {
+                System.out.println("Cannot parse the provided XES file.");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return eventLog;
+    }
+
+    public EventLog readXES(String filePath) {
+        PrintStream currentOut = System.out;
+        EventLog traces = new EventLog();
         try {
+            System.setOut(new PrintStream(new ByteArrayOutputStream()));
             FileInputStream fileInputStream = new FileInputStream(filePath);
             XParser parser = new XesXmlParser();
             List<XLog> logs = parser.parse(fileInputStream);
@@ -24,12 +88,12 @@ public class EventLogUtils {
                 XLog log = logs.get(0); // Assuming there's only one log in the XES file
 
                 for (XTrace xTrace : log) {
-                    Trace testTrace = new Trace();
+                    Trace trace = new Trace();
                     for (org.deckfour.xes.model.XEvent xEvent : xTrace) {
                         String activityName = xEvent.getAttributes().get("concept:name").toString();
-                        testTrace.add(activityName);
+                        trace.add(activityName);
                     }
-                    eventLog.add(testTrace);
+                    traces.add(trace);
                 }
             } else {
                 System.out.println("No logs found in the XES file.");
@@ -37,8 +101,10 @@ public class EventLogUtils {
             fileInputStream.close();
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            System.setOut(currentOut);
         }
-        return eventLog;
+        return traces;
     }
 
     public void generateXES(EventLog log, String fileName) {

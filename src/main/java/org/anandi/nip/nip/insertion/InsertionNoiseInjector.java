@@ -26,6 +26,7 @@ public abstract class InsertionNoiseInjector implements NoiseInjector {
         injectNoise(cleanTrace, length, probability);
     }
 
+    @Override
     public void injectNoise(Trace cleanTrace, int length, double probability) {
         double methodDecider = Math.random();
         if (methodDecider < probability) {
