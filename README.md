@@ -1,4 +1,4 @@
-# NIPs (Noise Injection Programs)
+# NIP (Noise Injection Program)
 
 ## Overview
 
