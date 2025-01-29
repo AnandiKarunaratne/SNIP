@@ -1,8 +1,8 @@
-# NIP (Noise Injection Program)
+# SNIP (Structured Noise Injection Program)
 
 ## Overview
 
-NIPs is a tool designed to inject noise into a given event log in the XES (https://xes-standard.org/) format. It allows users to specify the noise level and types of noise they want to introduce. The output is a noisy event log in the XES format.
+SNIP is a tool designed to inject noise into a given event log in the XES (https://xes-standard.org/) format. It allows users to specify the noise level and types of noise they want to introduce. The output is a noisy event log in the XES format.
 
 ## Features
 
