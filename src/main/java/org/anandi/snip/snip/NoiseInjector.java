@@ -5,6 +5,5 @@ import org.anandi.snip.eventlog.Trace;
 public abstract class NoiseInjector {
 
     public abstract String injectNoise(Trace cleanTrace, int length);
-//    String injectNoise(Trace cleanTrace, int length, double probability);
 
 }

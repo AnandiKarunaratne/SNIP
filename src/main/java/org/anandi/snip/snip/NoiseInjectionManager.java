@@ -19,11 +19,7 @@ public class NoiseInjectionManager {
     }
 
     public EventLog generateNoisyLogWithReplacement(EventLog cleanLog, double noiseLevel, Set<NoiseType> noiseTypes) {
-        logEntry += "{\n\"log_size\": " + cleanLog.getNumOfTraces() +
-                ",\n\"num_of_distinct_traces\": " + cleanLog.getNumOfDistinctTraces() +
-                ",\n\"num_of_distinct_activities\": " + cleanLog.getNumOfActivities() +
-                ",\n\"distinct_activities\": " + cleanLog.getActivities() +
-                ",\n\"noise_level\": " + noiseLevel + "\n},\n";
+        logEntry += initialLogEntry(cleanLog, noiseLevel);
 
         isNoiseTypesAllowed(noiseTypes);
         this.activities = cleanLog.getActivities();
@@ -45,16 +41,12 @@ public class NoiseInjectionManager {
                 i--;
             }
         }
+        logEntry += finalLogEntry(cleanLog);
         return cleanLog;
     }
 
     public EventLog generateNoisyLogWithoutReplacement(EventLog cleanLog, double noiseLevel, Set<NoiseType> noiseTypes) {
-
-        logEntry += "{\n\"log_size\": " + cleanLog.getNumOfTraces() +
-                ",\n\"num_of_distinct_traces\": " + cleanLog.getNumOfDistinctTraces() +
-                ",\n\"num_of_distinct_activities\": " + cleanLog.getNumOfActivities() +
-                ",\n\"distinct_activities\": " + cleanLog.getActivities() +
-                ",\n\"noise_level\": " + noiseLevel + "\n},\n";
+        logEntry += initialLogEntry(cleanLog, noiseLevel);
 
         isNoiseTypesAllowed(noiseTypes);
         this.activities = cleanLog.getActivities();
@@ -85,6 +77,7 @@ public class NoiseInjectionManager {
 
         EventLog noisyLog = new EventLog(traceRemovedList);
         noisyLog.addAll(noiseList);
+        logEntry += finalLogEntry(noisyLog);
         return noisyLog;
     }
 
@@ -139,9 +132,23 @@ public class NoiseInjectionManager {
                 break;
         }
         logMessage += "\"noisy_trace\": \"" + cleanTrace + "\"\n},\n";
-//        System.out.println(logMessage);
         logEntry += logMessage + "\n";
         return logMessage;
+    }
+
+    private String initialLogEntry(EventLog cleanLog, double noiseLevel) {
+        return "{\n\"log_size\": " + cleanLog.getNumOfTraces() +
+                ",\n\"initial_num_of_distinct_traces\": " + cleanLog.getNumOfDistinctTraces() +
+                ",\n\"initial_num_of_distinct_activities\": " + cleanLog.getNumOfActivities() +
+                ",\n\"initial_distinct_activities\": " + cleanLog.getActivities() +
+                ",\n\"noise_level\": " + noiseLevel + "\n},\n";
+    }
+
+    private String finalLogEntry(EventLog log) {
+        return "{\n\"log_size\": " + log.getNumOfTraces() +
+                ",\n\"final_num_of_distinct_traces\": " + log.getNumOfDistinctTraces() +
+                ",\n\"final_num_of_distinct_activities\": " + log.getNumOfActivities() +
+                ",\n\"final_distinct_activities\": " + log.getActivities() + "\n}";
     }
 
 }

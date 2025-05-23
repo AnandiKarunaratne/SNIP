@@ -57,7 +57,7 @@ public class SubstitutionNoiseInjectorTest {
 
     private boolean isSequentiallySubstituted(int length) {
         boolean isSequential = false;
-        for (int i = 0; i < baseTrace.size() - length; i++) {
+        for (int i = 0; i <= baseTrace.size() - length; i++) {
             List<String> noisySubtrace1 = cleanTrace.subList(0, i);
             List<String> noisySubtrace2 = cleanTrace.subList(i + length, baseTrace.size());
             List<String> cleanSubtrace1 = baseTrace.subList(0, i);
