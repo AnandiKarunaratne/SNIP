@@ -4,7 +4,7 @@ import org.anandi.snip.eventlog.Trace;
 
 import java.util.Random;
 
-public class ActivitySwapper extends OrderingNoiseInjector {
+public class SwappingNoiseInjector extends OrderingNoiseInjector {
 
     @Override
     public String injectNoise(Trace cleanTrace, int length, double probability) {

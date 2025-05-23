@@ -18,7 +18,7 @@ public class InsertionNoiseInjectionManager extends NoiseInjectionManager {
 
     @Override
     public String generateNoisyTrace(Trace cleanTrace, int length) {
-        return new AbsenceNoiseInjector().injectNoise(cleanTrace, length);
+        return new InsertionNoiseInjector(activities).injectNoise(cleanTrace, length);
     }
 
     @Override

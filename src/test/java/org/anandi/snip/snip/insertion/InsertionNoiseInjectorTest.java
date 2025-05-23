@@ -16,10 +16,10 @@ public class InsertionNoiseInjectorTest {
     InsertionNoiseInjector insertionNoiseInserter = new InsertionNoiseInjector(activities);
     Trace baseTrace = new Trace(Arrays.asList("a", "b", "c", "a", "b", "d"));
     Trace cleanTrace = new Trace(baseTrace);
+    Random random = new Random();
 
     @Test
     public void testManualSequentialProcessInsertion() {
-        Random random = new Random();
         int length = random.nextInt(cleanTrace.size() / 3) + 1;
 
         InsertionNoiseInjector sequentialProcessInserter = new InsertionNoiseInjector(activities, 1, 1);
@@ -31,7 +31,6 @@ public class InsertionNoiseInjectorTest {
 
     @Test
     public void testManualRandomProcessInsertion() {
-        Random random = new Random();
         int length = random.nextInt(cleanTrace.size() / 3) + 1;
 
         InsertionNoiseInjector randomProcessInserter = new InsertionNoiseInjector(activities, 0, 1);
@@ -43,7 +42,6 @@ public class InsertionNoiseInjectorTest {
 
     @Test
     public void testManualSequentialUnrelatedInsertion() {
-        Random random = new Random();
         int length = random.nextInt(cleanTrace.size() / 3) + 1;
 
         InsertionNoiseInjector sequentialUnrelatedInserter = new InsertionNoiseInjector(activities, 1, 0);
@@ -55,7 +53,6 @@ public class InsertionNoiseInjectorTest {
 
     @Test
     public void testManualRandomUnrelatedInsertion() {
-        Random random = new Random();
         int length = random.nextInt(cleanTrace.size() / 3) + 1;
 
         InsertionNoiseInjector randomProcessInserter = new InsertionNoiseInjector(activities, 0, 0);
@@ -67,7 +64,6 @@ public class InsertionNoiseInjectorTest {
 
     @Test
     public void testInjectNoise() {
-        Random random = new Random();
         int length = random.nextInt(cleanTrace.size() / 3) + 1;
         insertionNoiseInserter.injectNoise(cleanTrace, length);
         assertEquals(cleanTrace.size(), baseTrace.size() + length);
@@ -75,7 +71,6 @@ public class InsertionNoiseInjectorTest {
 
     @Test
     public void testInsertRandomConsecutiveActivities() {
-        Random random = new Random();
         int length = random.nextInt(cleanTrace.size() / 3) + 1;
         insertionNoiseInserter.insertConsecutiveActivities(cleanTrace, length);
         assertEquals(cleanTrace.size(), baseTrace.size() + length);
@@ -101,7 +96,6 @@ public class InsertionNoiseInjectorTest {
 
     @Test
     public void testInjectProcessActivity() {
-        Random random = new Random();
         int insertIndex = random.nextInt(cleanTrace.size()) + 1;
         insertionNoiseInserter.injectProcessActivity(cleanTrace, insertIndex);
         assertEquals(cleanTrace.size(), baseTrace.size() + 1);
@@ -118,7 +112,6 @@ public class InsertionNoiseInjectorTest {
 
     @Test
     public void testInjectUnrelatedActivity() {
-        Random random = new Random();
         int insertIndex = random.nextInt(cleanTrace.size()) + 1;
         insertionNoiseInserter.injectUnrelatedActivity(cleanTrace, insertIndex);
         assertEquals(cleanTrace.size(), baseTrace.size() + 1);

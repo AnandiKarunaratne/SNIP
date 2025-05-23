@@ -20,10 +20,10 @@ public class OrderingNoiseInjectionManager extends NoiseInjectionManager {
         double classDecider = Math.random();
         if (classDecider < probability) {
             logMessage += "\"shift\",\n";
-            logMessage += new ActivityShifter().injectNoise(cleanTrace, length);
+            logMessage += new ShiftingNoiseInjector().injectNoise(cleanTrace, length);
         } else {
             logMessage += "\"swap\",\n";
-            logMessage += new ActivitySwapper().injectNoise(cleanTrace, length);
+            logMessage += new SwappingNoiseInjector().injectNoise(cleanTrace, length);
         }
         return logMessage;
     }
