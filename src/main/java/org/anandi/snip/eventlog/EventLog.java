@@ -21,4 +21,20 @@ public class EventLog extends ArrayList<Trace> {
         return activities;
     }
 
+    public Set<Trace> getDistinctTraces() {
+        return new HashSet<>(this);
+    }
+
+    public int getNumOfActivities() {
+        return getActivities().size();
+    }
+
+    public int getNumOfDistinctTraces() {
+        return getDistinctTraces().size();
+    }
+
+    public int getNumOfTraces() {
+        return this.size();
+    }
+
 }

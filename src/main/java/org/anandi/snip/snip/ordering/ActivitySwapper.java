@@ -7,18 +7,47 @@ import java.util.Random;
 public class ActivitySwapper extends OrderingNoiseInjector {
 
     @Override
-    public void injectNoise(Trace cleanTrace, int length, double probability) {
+    public String injectNoise(Trace cleanTrace, int length, double probability) {
+        double methodDecider = Math.random();
+        if (methodDecider < probability) {
+            swapActivitiesRandomly(cleanTrace, length);
+            return("\"position\": \"random\",\n");
+        } else {
+            swapActivitiesConsecutively(cleanTrace, length);
+            return("\"position\": \"consecutive\",\n");
+        }
+    }
+
+    public void swapActivitiesRandomly(Trace cleanTrace, int length) {
+        double probability = 0.5;
+        for (int i = 0; i < length; i++) {
+            double methodDecider = Math.random();
+            if (methodDecider < probability) {
+                swapActivities(cleanTrace, 1);
+//                System.out.println("swap");
+            } else {
+                swapAdjacentActivities(cleanTrace, 1);
+//                System.out.println("adjacent");
+            }
+
+        }
+    }
+
+    public void swapActivitiesConsecutively(Trace cleanTrace, int length) {
+        double probability = 0.5;
         double methodDecider = Math.random();
         if (methodDecider < probability) {
             swapActivities(cleanTrace, length);
+//            System.out.println("swap");
         } else {
             swapAdjacentActivities(cleanTrace, length);
+//            System.out.println("adjacent");
         }
     }
 
     public void swapActivities(Trace cleanTrace, int length, int index1, int index2) {
         if (cleanTrace.size() < 2 * length) {
-            throw new IllegalArgumentException("The trace be longer than twice the length of the subtrace to swap.");
+            throw new IllegalArgumentException("The trace must be longer than twice the length of the subtrace to swap.");
         }
         if (index1 > cleanTrace.size() - 2 * length || index1 < 0) {
             throw new IllegalArgumentException("Invalid first index.");
@@ -56,7 +85,7 @@ public class ActivitySwapper extends OrderingNoiseInjector {
 
     public void swapAdjacentActivities(Trace cleanTrace, int length) {
         if (cleanTrace.size() < 2 * length) {
-            throw new IllegalArgumentException("The trace be longer than twice the length of the subtrace to swap.");
+            throw new IllegalArgumentException("The trace must be longer than twice the length of the subtrace to swap.");
         }
         Random random = new Random();
         int index = random.nextInt(cleanTrace.size() - length + 1);
@@ -65,7 +94,7 @@ public class ActivitySwapper extends OrderingNoiseInjector {
 
     public void swapAdjacentActivities(Trace cleanTrace, int length, int index) {
         if (cleanTrace.size() < 2 * length) {
-            throw new IllegalArgumentException("The trace be longer than twice the length of the subtrace to swap.");
+            throw new IllegalArgumentException("The trace must be longer than twice the length of the subtrace to swap.");
         }
         int index1;
         int index2;

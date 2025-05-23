@@ -10,18 +10,22 @@ import java.util.Set;
 public class OrderingNoiseInjectionManager extends NoiseInjectionManager {
 
     @Override
-    public void generateNoisyTrace(Trace cleanTrace, int length) {
+    public String generateNoisyTrace(Trace cleanTrace, int length) {
         double probability = 0.5; // shifting activities and swapping activities have equal probabilities.
-        generateNoisyTrace(cleanTrace, length, probability);
+        return generateNoisyTrace(cleanTrace, length, probability);
     }
 
-    public void generateNoisyTrace(Trace cleanTrace, int length, double probability) {
+    public String generateNoisyTrace(Trace cleanTrace, int length, double probability) {
+        String logMessage = "\"operation\": ";
         double classDecider = Math.random();
         if (classDecider < probability) {
-            new ActivityShifter().injectNoise(cleanTrace, length);
+            logMessage += "\"shift\",\n";
+            logMessage += new ActivityShifter().injectNoise(cleanTrace, length);
         } else {
-            new ActivitySwapper().injectNoise(cleanTrace, length);
+            logMessage += "\"swap\",\n";
+            logMessage += new ActivitySwapper().injectNoise(cleanTrace, length);
         }
+        return logMessage;
     }
 
     @Override

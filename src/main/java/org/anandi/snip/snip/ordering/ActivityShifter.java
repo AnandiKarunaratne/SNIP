@@ -7,17 +7,51 @@ import java.util.Random;
 public class ActivityShifter extends OrderingNoiseInjector {
 
     @Override
-    public void injectNoise(Trace cleanTrace, int length, double probability) {
+    public String injectNoise(Trace cleanTrace, int length, double probability) {
+        String logMessage = "\"position\": ";
+        double methodDecider = Math.random();
+        if (methodDecider < probability) {
+            logMessage += "\"random\",\n";
+            shiftActivitiesRandomly(cleanTrace, length);
+        } else {
+            logMessage += "\"consecutive\",\n";
+            shiftActivitiesConsecutively(cleanTrace, length);
+        }
+        return logMessage;
+    }
+
+    public String shiftActivitiesRandomly(Trace cleanTrace, int length) {
+        String logMessage = "\"direction\": ";
+        double probability = 0.5; // similar probability to shift left or right
+        for (int i = 0; i < length; i++) {
+            double methodDecider = Math.random();
+            if (methodDecider < probability) {
+                shiftActivitiesToLeft(cleanTrace, 1);
+                logMessage += "\"left\",\n";
+            } else {
+                shiftActivitiesToRight(cleanTrace, 1);
+                logMessage += "\"right\",\n";
+            }
+        }
+        return logMessage;
+    }
+
+    public String shiftActivitiesConsecutively(Trace cleanTrace, int length) {
+        String logMessage = "\"direction\": ";
+        double probability = 0.5; // similar probability to shift left or right
         double methodDecider = Math.random();
         if (methodDecider < probability) {
             shiftActivitiesToLeft(cleanTrace, length);
+            logMessage += "\"left\",\n";
         } else {
             shiftActivitiesToRight(cleanTrace, length);
+            logMessage += "\"right\",\n";
         }
+        return logMessage;
     }
 
     public void shiftActivitiesToLeft(Trace cleanTrace, int length) {
-        if (cleanTrace.size() < length) {
+        if (cleanTrace.size() <= length) {
             throw new IllegalArgumentException("The trace should be longer than the length of the subtrace to be shifted.");
         }
         Random random = new Random();
@@ -31,7 +65,7 @@ public class ActivityShifter extends OrderingNoiseInjector {
     }
 
     public void shiftActivitiesToLeft(Trace cleanTrace, int length, int startIndex, int shiftIndex) {
-        if (cleanTrace.size() < length) {
+        if (cleanTrace.size() <= length) {
             throw new IllegalArgumentException("The trace should be longer than the length of the subtrace to be shifted.");
         }
         if (startIndex <= shiftIndex) {
@@ -54,7 +88,7 @@ public class ActivityShifter extends OrderingNoiseInjector {
     }
 
     public void shiftActivitiesToRight(Trace cleanTrace, int length) {
-        if (cleanTrace.size() < length) {
+        if (cleanTrace.size() <= length) {
             throw new IllegalArgumentException("The trace should be longer than the length of the subtrace to be shifted.");
         }
         Random random = new Random();
@@ -68,7 +102,7 @@ public class ActivityShifter extends OrderingNoiseInjector {
     }
 
     public void shiftActivitiesToRight(Trace cleanTrace, int length, int startIndex, int shiftIndex) {
-        if (cleanTrace.size() < length) {
+        if (cleanTrace.size() <= length) {
             throw new IllegalArgumentException("The trace should be longer than the length of the subtrace to be shifted.");
         }
         if (startIndex >= shiftIndex) {

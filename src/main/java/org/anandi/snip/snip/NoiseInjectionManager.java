@@ -12,8 +12,50 @@ import java.util.*;
 public class NoiseInjectionManager {
 
     private Set<String> activities = new HashSet<>();
+    protected String logEntry = "";
 
-    public EventLog generateNoisyLog(EventLog cleanLog, double noiseLevel, Set<NoiseType> noiseTypes) {
+    public String getLogEntry() {
+        return logEntry;
+    }
+
+    public EventLog generateNoisyLogWithReplacement(EventLog cleanLog, double noiseLevel, Set<NoiseType> noiseTypes) {
+        logEntry += "{\n\"log_size\": " + cleanLog.getNumOfTraces() +
+                ",\n\"num_of_distinct_traces\": " + cleanLog.getNumOfDistinctTraces() +
+                ",\n\"num_of_distinct_activities\": " + cleanLog.getNumOfActivities() +
+                ",\n\"distinct_activities\": " + cleanLog.getActivities() +
+                ",\n\"noise_level\": " + noiseLevel + "\n},\n";
+
+        isNoiseTypesAllowed(noiseTypes);
+        this.activities = cleanLog.getActivities();
+
+        int numOfNoisyTraces = (int) (noiseLevel * cleanLog.size());
+
+        Random random = new Random();
+
+        for (int i = 0; i < numOfNoisyTraces; i++) {
+            try {
+                int index = random.nextInt(cleanLog.size());
+                Trace cleanTrace = cleanLog.get(index);
+
+                int bound = Math.max(1, cleanTrace.size() / 3);
+                int length = random.nextInt(bound) + 1;
+                generateNoisyTrace(cleanTrace, length, noiseTypes);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Skipping trace due to: " + e.getMessage());
+                i--;
+            }
+        }
+        return cleanLog;
+    }
+
+    public EventLog generateNoisyLogWithoutReplacement(EventLog cleanLog, double noiseLevel, Set<NoiseType> noiseTypes) {
+
+        logEntry += "{\n\"log_size\": " + cleanLog.getNumOfTraces() +
+                ",\n\"num_of_distinct_traces\": " + cleanLog.getNumOfDistinctTraces() +
+                ",\n\"num_of_distinct_activities\": " + cleanLog.getNumOfActivities() +
+                ",\n\"distinct_activities\": " + cleanLog.getActivities() +
+                ",\n\"noise_level\": " + noiseLevel + "\n},\n";
+
         isNoiseTypesAllowed(noiseTypes);
         this.activities = cleanLog.getActivities();
         EventLog traceRemovedList = new EventLog(cleanLog);
@@ -24,12 +66,21 @@ public class NoiseInjectionManager {
         Random random = new Random();
 
         for (int i = 0; i < numOfNoisyTraces; i++) {
-            int index = random.nextInt(traceRemovedList.size());
-            Trace cleanTrace = traceRemovedList.get(index);
-            traceRemovedList.remove(index);
-            int length = random.nextInt(cleanTrace.size() / 3) + 1;
-            generateNoisyTrace(cleanTrace, length, noiseTypes);
-            noiseList.add(cleanTrace);
+            try {
+                int index = random.nextInt(traceRemovedList.size());
+                Trace cleanTrace = traceRemovedList.get(index);
+
+                int bound = Math.max(1, cleanTrace.size() / 3);
+                int length = random.nextInt(bound) + 1;
+                generateNoisyTrace(cleanTrace, length, noiseTypes);
+
+                // do these only if there's no exception
+                noiseList.add(cleanTrace);
+                traceRemovedList.remove(index);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Skipping trace due to: " + e.getMessage());
+                i--;
+            }
         }
 
         EventLog noisyLog = new EventLog(traceRemovedList);
@@ -39,25 +90,25 @@ public class NoiseInjectionManager {
 
     protected void isNoiseTypesAllowed(Set<NoiseType> noiseTypes) {
         if (!getNoiseTypes().containsAll(noiseTypes)) {
-            throw new IllegalArgumentException("Specified noise type is now allowed by the injector");
+            throw new IllegalArgumentException("Specified noise type is not allowed by the injector");
         }
     }
 
-    public EventLog generateNoisyLog(EventLog cleanLog, double noisePercentage) {
-        return generateNoisyLog(cleanLog, noisePercentage, getNoiseTypes());
+    public EventLog generateNoisyLogWithoutReplacement(EventLog cleanLog, double noisePercentage) {
+        return generateNoisyLogWithoutReplacement(cleanLog, noisePercentage, getNoiseTypes());
     }
 
-    public void generateNoisyTrace(Trace cleanTrace, int length, Set<NoiseType> noiseTypeSet) { // set to ensure no duplicates
+    public String generateNoisyTrace(Trace cleanTrace, int length, Set<NoiseType> noiseTypeSet) { // set to ensure no duplicates
         isNoiseTypesAllowed(noiseTypeSet);
         List<NoiseType> noiseTypeList = new ArrayList<>(noiseTypeSet);
         Random random = new Random();
         int noiseTypeIndex = random.nextInt(noiseTypeList.size());
         NoiseType noiseType = noiseTypeList.get(noiseTypeIndex);
-        generateNoisyTrace(cleanTrace, length, noiseType);
+        return generateNoisyTrace(cleanTrace, length, noiseType);
     }
 
-    public void generateNoisyTrace(Trace cleanTrace, int length) {
-        generateNoisyTrace(cleanTrace, length, getNoiseTypes());
+    public String generateNoisyTrace(Trace cleanTrace, int length) {
+        return generateNoisyTrace(cleanTrace, length, getNoiseTypes());
     }
 
     protected Set<NoiseType> getNoiseTypes() {
@@ -69,23 +120,28 @@ public class NoiseInjectionManager {
         return noiseTypes;
     }
 
-    private void generateNoisyTrace(Trace cleanTrace, int length, NoiseType noiseType) {
-        System.out.println("Injecting " + noiseType + " noise to trace: " + cleanTrace);
+    private String generateNoisyTrace(Trace cleanTrace, int length, NoiseType noiseType) {
+        String logMessage = "{\n\"original_trace\": \"" + cleanTrace + "\",\n";
+        logMessage += "\"length\": \"" + length + "\",\n";
+        logMessage += "\"noise_type\": \"" + noiseType.toString() + "\",\n";
         switch (noiseType) {
             case ABSENCE:
-                new AbsenceNoiseInjectionManager().generateNoisyTrace(cleanTrace, length);
+                logMessage += new AbsenceNoiseInjectionManager().generateNoisyTrace(cleanTrace, length);
                 break;
             case INSERTION:
-                new InsertionNoiseInjectionManager(activities).generateNoisyTrace(cleanTrace, length);
+                logMessage += new InsertionNoiseInjectionManager(activities).generateNoisyTrace(cleanTrace, length);
                 break;
             case ORDERING:
-                new OrderingNoiseInjectionManager().generateNoisyTrace(cleanTrace, length);
+                logMessage += new OrderingNoiseInjectionManager().generateNoisyTrace(cleanTrace, length);
                 break;
             case SUBSTITUTION:
-                new SubstitutionNoiseInjectionManager(activities).generateNoisyTrace(cleanTrace, length);
+                logMessage += new SubstitutionNoiseInjectionManager(activities).generateNoisyTrace(cleanTrace, length);
                 break;
         }
-        System.out.println("Injected " + noiseType + " noise:           " + cleanTrace + "\n");
+        logMessage += "\"noisy_trace\": \"" + cleanTrace + "\"\n},\n";
+//        System.out.println(logMessage);
+        logEntry += logMessage + "\n";
+        return logMessage;
     }
 
 }

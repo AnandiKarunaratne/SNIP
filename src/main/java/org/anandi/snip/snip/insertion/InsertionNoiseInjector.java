@@ -21,19 +21,23 @@ public abstract class InsertionNoiseInjector implements NoiseInjector {
      * some noise consecutively, and other at random places?
      */
     @Override
-    public void injectNoise(Trace cleanTrace, int length) {
+    public String injectNoise(Trace cleanTrace, int length) {
         double probability = 0.5; // inserting activities consecutively or randomly has equal probability
-        injectNoise(cleanTrace, length, probability);
+        return injectNoise(cleanTrace, length, probability);
     }
 
     @Override
-    public void injectNoise(Trace cleanTrace, int length, double probability) {
+    public String injectNoise(Trace cleanTrace, int length, double probability) {
+        String logMessage = "\"position\": ";
         double methodDecider = Math.random();
         if (methodDecider < probability) {
+            logMessage += "\"consecutive\",\n";
             insertConsecutiveActivities(cleanTrace, length);
         } else {
             insertRandomActivities(cleanTrace, length);
+            logMessage += "\"random\",\n";
         }
+        return logMessage;
     }
 
     public void insertConsecutiveActivities(Trace cleanTrace, int length) {

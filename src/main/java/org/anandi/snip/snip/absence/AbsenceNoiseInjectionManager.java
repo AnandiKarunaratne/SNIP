@@ -10,8 +10,8 @@ import java.util.Set;
 public class AbsenceNoiseInjectionManager extends NoiseInjectionManager {
 
     @Override
-    public void generateNoisyTrace(Trace cleanTrace, int length) {
-        new AbsenceNoiseInjector().injectNoise(cleanTrace, length);
+    public String generateNoisyTrace(Trace cleanTrace, int length) {
+        return new AbsenceNoiseInjector().injectNoise(cleanTrace, length);
     }
 
     @Override

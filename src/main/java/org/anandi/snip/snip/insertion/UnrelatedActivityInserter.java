@@ -7,7 +7,7 @@ import java.util.Set;
 
 public class UnrelatedActivityInserter extends InsertionNoiseInjector {
 
-    UnrelatedActivityInserter(Set<String> activities) {
+    public UnrelatedActivityInserter(Set<String> activities) {
         super(activities);
     }
 

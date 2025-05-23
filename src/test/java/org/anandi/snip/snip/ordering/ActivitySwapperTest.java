@@ -20,7 +20,7 @@ public class ActivitySwapperTest {
     @Test
     public void testSwapActivities() {
         Exception exception1 = assertThrows(IllegalArgumentException.class, () -> activitySwapper.swapActivities(new Trace(), 2, 0, 1));
-        String expectedMessage1 = "The trace be longer than twice the length of the subtrace to swap.";
+        String expectedMessage1 = "The trace must be longer than twice the length of the subtrace to swap.";
         String actualMessage1 = exception1.getMessage();
         assertTrue(actualMessage1.contains(expectedMessage1));
 
@@ -100,7 +100,7 @@ public class ActivitySwapperTest {
     @Test
     public void testSwapAdjacentActivities() {
         Exception exception1 = assertThrows(IllegalArgumentException.class, () -> activitySwapper.swapAdjacentActivities(cleanTrace, 5, 1));
-        String expectedMessage1 = "The trace be longer than twice the length of the subtrace to swap.";
+        String expectedMessage1 = "The trace must be longer than twice the length of the subtrace to swap.";
         String actualMessage1 = exception1.getMessage();
         assertEquals(actualMessage1, expectedMessage1);
 

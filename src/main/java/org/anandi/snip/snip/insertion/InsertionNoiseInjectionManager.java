@@ -16,18 +16,22 @@ public class InsertionNoiseInjectionManager extends NoiseInjectionManager {
     }
 
     @Override
-    public void generateNoisyTrace(Trace cleanTrace, int length) {
+    public String generateNoisyTrace(Trace cleanTrace, int length) {
         double probability = 0.5; // inserting process activities and unrelated activities have equal probabilities.
-        generateNoisyTrace(cleanTrace, length, probability);
+        return generateNoisyTrace(cleanTrace, length, probability);
     }
 
-    public void generateNoisyTrace(Trace cleanTrace, int length, double probability) {
+    public String generateNoisyTrace(Trace cleanTrace, int length, double probability) {
         double classDecider = Math.random();
+        String logMessage = "\"insertion_activity_type\": ";
         if (classDecider < probability) {
-            new ProcessActivityInserter(activities).injectNoise(cleanTrace, length);
+            logMessage += "\"process\",\n";
+            logMessage += new ProcessActivityInserter(activities).injectNoise(cleanTrace, length);
         } else {
-            new UnrelatedActivityInserter(activities).injectNoise(cleanTrace, length);
+            logMessage += "\"external\",\n";
+            logMessage += new UnrelatedActivityInserter(activities).injectNoise(cleanTrace, length);
         }
+        return logMessage;
     }
 
     @Override

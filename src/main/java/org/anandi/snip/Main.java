@@ -79,25 +79,26 @@ public class Main {
                 }
 
                 double noisePercentage = 0.0;
-                if (cmd.hasOption(noiseLevel)) {
-                    noisePercentage = Double.parseDouble(cmd.getOptionValue(noiseLevel));
-                    NOISE_LEVEL = noisePercentage / 100;
+                String noiseDescText = "";
+
+                if (cmd.hasOption(insertion)) {
+                    NOISE_TYPES.add(NoiseType.INSERTION);
+                    noiseDescText += "i-";
                 }
 
                 if (cmd.hasOption(absence)) {
                     NOISE_TYPES.add(NoiseType.ABSENCE);
-                }
-
-                if (cmd.hasOption(insertion)) {
-                    NOISE_TYPES.add(NoiseType.INSERTION);
+                    noiseDescText += "a-";
                 }
 
                 if (cmd.hasOption(ordering)) {
                     NOISE_TYPES.add(NoiseType.ORDERING);
+                    noiseDescText += "o-";
                 }
 
                 if (cmd.hasOption(substitution)) {
                     NOISE_TYPES.add(NoiseType.SUBSTITUTION);
+                    noiseDescText += "s-";
                 }
 
                 if (NOISE_TYPES.isEmpty()) {
@@ -105,19 +106,28 @@ public class Main {
                     NOISE_TYPES.add(NoiseType.INSERTION);
                     NOISE_TYPES.add(NoiseType.ORDERING);
                     NOISE_TYPES.add(NoiseType.SUBSTITUTION);
+                    noiseDescText += "i-a-o-s-";
+                }
+
+                if (cmd.hasOption(noiseLevel)) {
+                    noisePercentage = Double.parseDouble(cmd.getOptionValue(noiseLevel));
+                    noiseDescText += noisePercentage;
+                    NOISE_LEVEL = noisePercentage / 100;
                 }
 
                 String noiseTypesString = NOISE_TYPES.stream().map(NoiseType::name).collect(Collectors.joining(", "));
                 System.out.println("================================================================================\n" +
                         "Injecting " + noisePercentage + "% noise to the event log with noise types: " + noiseTypesString + ".\n");
-                EventLog noisyLog = new NoiseInjectionManager().generateNoisyLog(CLEAN_LOG, NOISE_LEVEL, NOISE_TYPES);
-                String outputFilePath = extractFolderPath(inputFilePath) + "/" + extractFileNameWithoutExtension(inputFilePath) + "-noise-" + NOISE_LEVEL + ".xes";
+                NoiseInjectionManager noiseInjectionManager= new NoiseInjectionManager();
+                EventLog noisyLog = noiseInjectionManager.generateNoisyLogWithReplacement(CLEAN_LOG, NOISE_LEVEL, NOISE_TYPES);
+                String outputFilePath = extractFolderPath(inputFilePath) + "/" + extractFileNameWithoutExtension(inputFilePath) + "-noise-" + noiseDescText + ".xes";
                 System.out.println("================================================================================\n\n" +
                         "Writing noise injected event log: " + outputFilePath);
                 new EventLogUtils().generateXES(noisyLog, outputFilePath);
                 overrideQuietMode();
                 System.out.println("Noisy log generated: " + outputFilePath);
                 if(!isQuiet) System.out.println("\n================================================================================");
+                generateLogOfPerformedActions(noiseInjectionManager.getLogEntry(), extractFolderPath(inputFilePath) + "/" + extractFileNameWithoutExtension(inputFilePath) + "-noise-" + noiseDescText + "-log.txt");
             }
         } catch (ParseException e) {
             throw new RuntimeException(e);
@@ -161,7 +171,7 @@ public class Main {
         HelpFormatter formatter = new HelpFormatter();
 
         showHeader();
-        formatter.printHelp(120, "java -jar NIP-" + getVersion() + ".jar <options>",
+        formatter.printHelp(120, "java -jar SNIP-" + getVersion() + ".jar <options>",
                 "", options,
                 "================================================================================\n");
     }
@@ -180,6 +190,18 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
             return "unknown";
+        }
+    }
+
+    private static void generateLogOfPerformedActions(String logEntry, String outputPath) {
+        try {
+            FileWriter writer = new FileWriter(outputPath, true); // true = append mode
+            writer.write(logEntry + System.lineSeparator());
+            writer.close();
+            System.out.println("Log entry written successfully.");
+        } catch (IOException e) {
+            System.out.println("An error occurred while writing to the log file.");
+            e.printStackTrace();
         }
     }
 

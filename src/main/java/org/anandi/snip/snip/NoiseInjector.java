@@ -4,7 +4,7 @@ import org.anandi.snip.eventlog.Trace;
 
 public interface NoiseInjector {
 
-    void injectNoise(Trace cleanTrace, int length);
-    void injectNoise(Trace cleanTrace, int length, double probability);
+    String injectNoise(Trace cleanTrace, int length);
+    String injectNoise(Trace cleanTrace, int length, double probability);
 
 }

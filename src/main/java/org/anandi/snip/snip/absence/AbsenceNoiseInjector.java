@@ -8,19 +8,24 @@ import java.util.Random;
 public class AbsenceNoiseInjector implements NoiseInjector {
 
     @Override
-    public void injectNoise(Trace cleanTrace, int length) {
+    public String injectNoise(Trace cleanTrace, int length) {
         double probability = 0.5; // removing activities consecutively or randomly has equal probability
-        injectNoise(cleanTrace, length, probability);
+        return injectNoise(cleanTrace, length, probability);
     }
 
     @Override
-    public void injectNoise(Trace cleanTrace, int length, double probability) {
+    public String injectNoise(Trace cleanTrace, int length, double probability) {
+        String logMessage = "\"position\": ";
         double methodDecider = Math.random();
         if (methodDecider < probability) {
-            consecutiveActivityRemovalManager(cleanTrace, length);
+            logMessage += "\"consecutive\",\n";
+            String location = consecutiveActivityRemovalManager(cleanTrace, length);
+            logMessage += "\"location\": \"" + location + "\",\n";
         } else {
             removeRandomActivities(cleanTrace, length);
+            logMessage += "random\",\n";
         }
+        return logMessage;
     }
 
     public void removeRandomActivities(Trace cleanTrace, int length) {
@@ -53,15 +58,31 @@ public class AbsenceNoiseInjector implements NoiseInjector {
         removeConsecutiveActivities(cleanTrace, length, startIndex);
     }
 
-    protected void consecutiveActivityRemovalManager(Trace cleanTrace, int length) {
+    protected String consecutiveActivityRemovalManager(Trace cleanTrace, int length) {
+        // one problem we have to consider is, if the trace is too short, for example length = 2, then there can't
+        // be body removal.
+        if (cleanTrace.size() < 3) {
+            double probability = 1.0 / 2; // removing activities from head/tail has equal probability
+            double methodDecider = Math.random();
+            if (methodDecider < probability) {
+                removeHead(cleanTrace, length);
+                return "head";
+            } else {
+                removeTail(cleanTrace, length);
+                return "tail";
+            }
+        }
         double probability = 1.0 / 3; // removing activities from head/tail/body has equal probability
         double methodDecider = Math.random();
         if (methodDecider < probability) {
             removeHead(cleanTrace, length);
+            return "head";
         } else if (methodDecider < 2 * probability) {
             removeTail(cleanTrace, length);
+            return "tail";
         } else {
             removeBody(cleanTrace, length);
+            return "body";
         }
     }
 
