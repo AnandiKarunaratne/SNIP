@@ -6,10 +6,16 @@ import java.util.Random;
 
 public class SwappingNoiseInjector extends OrderingNoiseInjector {
 
+    public SwappingNoiseInjector() {}
+
+    public SwappingNoiseInjector(double positionProbability) {
+        super(positionProbability);
+    }
+
     @Override
-    public String injectNoise(Trace cleanTrace, int length, double probability) {
+    public String injectNoise(Trace cleanTrace, int length) {
         double methodDecider = Math.random();
-        if (methodDecider < probability) {
+        if (methodDecider < super.getPositionProbability()) {
             swapActivitiesRandomly(cleanTrace, length);
             return("\"position\": \"random\",\n");
         } else {
@@ -24,10 +30,8 @@ public class SwappingNoiseInjector extends OrderingNoiseInjector {
             double methodDecider = Math.random();
             if (methodDecider < probability) {
                 swapActivities(cleanTrace, 1);
-//                System.out.println("swap");
             } else {
                 swapAdjacentActivities(cleanTrace, 1);
-//                System.out.println("adjacent");
             }
 
         }
@@ -38,10 +42,8 @@ public class SwappingNoiseInjector extends OrderingNoiseInjector {
         double methodDecider = Math.random();
         if (methodDecider < probability) {
             swapActivities(cleanTrace, length);
-//            System.out.println("swap");
         } else {
             swapAdjacentActivities(cleanTrace, length);
-//            System.out.println("adjacent");
         }
     }
 

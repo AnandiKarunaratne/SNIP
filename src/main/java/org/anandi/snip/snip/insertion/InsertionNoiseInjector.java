@@ -6,7 +6,7 @@ import org.anandi.snip.snip.NoiseInjector;
 import java.util.Random;
 import java.util.Set;
 
-public class InsertionNoiseInjector implements NoiseInjector {
+public class InsertionNoiseInjector extends NoiseInjector {
 
     Set<String> activities;
 
@@ -23,7 +23,7 @@ public class InsertionNoiseInjector implements NoiseInjector {
     }
 
     // Manual decisions
-    InsertionNoiseInjector(Set<String> activities, double positionProbability, double processActivityProbability) {
+    public InsertionNoiseInjector(Set<String> activities, double positionProbability, double processActivityProbability) {
         this.activities = activities;
         this.positionProbability = positionProbability;
         this.processActivityProbability = processActivityProbability;
@@ -31,14 +31,9 @@ public class InsertionNoiseInjector implements NoiseInjector {
 
     @Override
     public String injectNoise(Trace cleanTrace, int length) {
-        return injectNoise(cleanTrace, length, positionProbability);
-    }
-
-    @Override
-    public String injectNoise(Trace cleanTrace, int length, double probability) {
         String logMessage = "\"position\": ";
         double methodDecider = Math.random();
-        if (methodDecider < probability) {
+        if (methodDecider < positionProbability) {
             logMessage += "\"consecutive\",\n";
             insertConsecutiveActivities(cleanTrace, length);
         } else {

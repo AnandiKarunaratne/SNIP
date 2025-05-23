@@ -2,9 +2,9 @@ package org.anandi.snip.snip;
 
 import org.anandi.snip.eventlog.Trace;
 
-public interface NoiseInjector {
+public abstract class NoiseInjector {
 
-    String injectNoise(Trace cleanTrace, int length);
-    String injectNoise(Trace cleanTrace, int length, double probability);
+    public abstract String injectNoise(Trace cleanTrace, int length);
+//    String injectNoise(Trace cleanTrace, int length, double probability);
 
 }

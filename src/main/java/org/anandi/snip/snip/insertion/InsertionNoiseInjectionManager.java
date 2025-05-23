@@ -3,7 +3,6 @@ package org.anandi.snip.snip.insertion;
 import org.anandi.snip.eventlog.Trace;
 import org.anandi.snip.snip.NoiseInjectionManager;
 import org.anandi.snip.snip.NoiseType;
-import org.anandi.snip.snip.absence.AbsenceNoiseInjector;
 
 import java.util.HashSet;
 import java.util.Set;

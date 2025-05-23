@@ -3,14 +3,11 @@ package org.anandi.snip.snip.substitution;
 import org.anandi.snip.eventlog.Trace;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.*;
 
 public class SubstitutionNoiseInjectorTest {
 
@@ -18,6 +15,61 @@ public class SubstitutionNoiseInjectorTest {
     SubstitutionNoiseInjector substitutionNoiseInjector = new SubstitutionNoiseInjector(activities);
     Trace baseTrace = new Trace(Arrays.asList("a", "b", "c", "a", "b", "d"));
     Trace cleanTrace = new Trace(baseTrace);
+    Random random = new Random();
+
+    @Test
+    public void testManualSequentialProcess() {
+        int length = random.nextInt(cleanTrace.size() / 3) + 1;;
+        SubstitutionNoiseInjector sequentialProcessSubstitutionNoiseInjector = new SubstitutionNoiseInjector(activities, 1, 1);
+        sequentialProcessSubstitutionNoiseInjector.injectNoise(cleanTrace, length);
+        assertEquals(baseTrace.size(), cleanTrace.size());
+        assertTrue(isSequentiallySubstituted(length));
+        assertTrue(activities.containsAll(cleanTrace));
+    }
+
+    @Test
+    public void testManualSequentialUnrelated() {
+        int length = random.nextInt(cleanTrace.size() / 3) + 1;;
+        SubstitutionNoiseInjector sequentialUnrelatedSubstitutionNoiseInjector = new SubstitutionNoiseInjector(activities, 1, 0);
+        sequentialUnrelatedSubstitutionNoiseInjector.injectNoise(cleanTrace, length);
+        assertEquals(baseTrace.size(), cleanTrace.size());
+        assertTrue(isSequentiallySubstituted(length));
+        assertFalse(activities.containsAll(cleanTrace));
+    }
+
+    @Test
+    public void testManualRandomProcess() {
+        int length = random.nextInt(cleanTrace.size() / 3) + 1;;
+        SubstitutionNoiseInjector randomProcessSubstitutionNoiseInjector = new SubstitutionNoiseInjector(activities, 0, 1);
+        randomProcessSubstitutionNoiseInjector.injectNoise(cleanTrace, length);
+        assertEquals(baseTrace.size(), cleanTrace.size());
+        assertTrue(activities.containsAll(cleanTrace));
+    }
+
+    @Test
+    public void testManualRandomUnrelated() {
+        int length = random.nextInt(cleanTrace.size() / 3) + 1;;
+        SubstitutionNoiseInjector randomUnrelatedSubstitutionNoiseInjector = new SubstitutionNoiseInjector(activities, 0, 0);
+        randomUnrelatedSubstitutionNoiseInjector.injectNoise(cleanTrace, length);
+        assertEquals(baseTrace.size(), cleanTrace.size());
+        assertFalse(activities.containsAll(cleanTrace));
+    }
+
+    private boolean isSequentiallySubstituted(int length) {
+        boolean isSequential = false;
+        for (int i = 0; i < baseTrace.size() - length; i++) {
+            List<String> noisySubtrace1 = cleanTrace.subList(0, i);
+            List<String> noisySubtrace2 = cleanTrace.subList(i + length, baseTrace.size());
+            List<String> cleanSubtrace1 = baseTrace.subList(0, i);
+            List<String> cleanSubtrace2 = baseTrace.subList(i + length, baseTrace.size());
+
+            if (noisySubtrace1.equals(cleanSubtrace1) && noisySubtrace2.equals(cleanSubtrace2)) {
+                isSequential = true;
+                break;
+            }
+        }
+        return isSequential;
+    }
 
     @Test
     public void testSubstituteRandomActivities() {

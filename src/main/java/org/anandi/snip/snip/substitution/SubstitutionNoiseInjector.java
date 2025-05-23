@@ -9,28 +9,31 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
-public class SubstitutionNoiseInjector implements NoiseInjector {
+public class SubstitutionNoiseInjector extends NoiseInjector {
+
+    private double positionProbability = 0.5; // If set to 0, insertion will happen only random in positions; If 1, only sequentially.
+    private double processActivityProbability = 0.5; // If set to 0, only process activities will be inserted.
 
     private final InsertionNoiseInjector insertionNoiseInjector;
-//    private final UnrelatedActivityInserter unrelatedActivityInserter;
     private final AbsenceNoiseInjector absenceNoiseInjector;
 
-    SubstitutionNoiseInjector(Set<String> activities) {
-        this.insertionNoiseInjector = new InsertionNoiseInjector(activities);
-        this.absenceNoiseInjector = new AbsenceNoiseInjector();
-//        this.unrelatedActivityInserter = new UnrelatedActivityInserter(activities);
+    public SubstitutionNoiseInjector(Set<String> activities) {
+        this.insertionNoiseInjector = new InsertionNoiseInjector(activities, positionProbability, processActivityProbability);
+        this.absenceNoiseInjector = new AbsenceNoiseInjector(positionProbability);
     }
-    @Override
-    public String injectNoise(Trace cleanTrace, int length) {
-        double probability = 0.5; // substituting activities randomly or consecutively have equal probabilities
-        return injectNoise(cleanTrace, length, probability);
+
+    public SubstitutionNoiseInjector(Set<String> activities, double positionProbability, double processActivityProbability) {
+        this.positionProbability = positionProbability;
+        this.processActivityProbability = processActivityProbability;
+        this.insertionNoiseInjector = new InsertionNoiseInjector(activities, positionProbability, processActivityProbability);
+        this.absenceNoiseInjector = new AbsenceNoiseInjector(positionProbability);
     }
 
     @Override
-    public String injectNoise(Trace cleanTrace, int length, double probability) {
+    public String injectNoise(Trace cleanTrace, int length) {
         double methodDecider = Math.random();
         String logMessage = "\"position\": ";
-        if (methodDecider < probability) {
+        if (methodDecider < positionProbability) {
             logMessage += "\"consecutive\",\n";
             substituteConsecutiveActivities(cleanTrace, length);
         } else {

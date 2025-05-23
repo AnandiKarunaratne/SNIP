@@ -9,10 +9,17 @@ import java.util.Set;
 
 public class OrderingNoiseInjectionManager extends NoiseInjectionManager {
 
+    private double operationProbability = 0.5; // If 0, swap
+
+    public OrderingNoiseInjectionManager() {}
+
+    public OrderingNoiseInjectionManager(double operationProbability) {
+        this.operationProbability = operationProbability;
+    }
+
     @Override
     public String generateNoisyTrace(Trace cleanTrace, int length) {
-        double probability = 0.5; // shifting activities and swapping activities have equal probabilities.
-        return generateNoisyTrace(cleanTrace, length, probability);
+        return generateNoisyTrace(cleanTrace, length, operationProbability);
     }
 
     public String generateNoisyTrace(Trace cleanTrace, int length, double probability) {

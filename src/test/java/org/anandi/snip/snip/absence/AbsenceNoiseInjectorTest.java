@@ -20,8 +20,25 @@ public class AbsenceNoiseInjectorTest {
     Random random = new Random();
 
     @Test
-    public void testRemoveRandomActivities() {
+    public void testManualSequentialAbsence() {
+        int length = random.nextInt(cleanTrace.size() / 3) + 1;
+        AbsenceNoiseInjector sequentialAbsenceNoiseInjector = new AbsenceNoiseInjector(1);
+        sequentialAbsenceNoiseInjector.injectNoise(cleanTrace, length);
+        assertEquals(baseTrace.size() - length, cleanTrace.size());
+        assertTrue(isRemovalConsecutive(baseTrace, cleanTrace));
+    }
+
+    @Test
+    public void testManualRandomAbsence() {
         int length = random.nextInt(cleanTrace.size() / 3) + 1;;
+        AbsenceNoiseInjector randomAbsenceNoiseInjector = new AbsenceNoiseInjector(0);
+        randomAbsenceNoiseInjector.injectNoise(cleanTrace, length);
+        assertEquals(baseTrace.size() - length, cleanTrace.size());
+    }
+
+    @Test
+    public void testRemoveRandomActivities() {
+        int length = random.nextInt(cleanTrace.size() / 3) + 1;
         absenceNoiseInjector.removeRandomActivities(cleanTrace, length);
         assertEquals(baseTrace.size() - length, cleanTrace.size());
     }

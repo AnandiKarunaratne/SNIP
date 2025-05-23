@@ -5,14 +5,12 @@ import org.anandi.snip.snip.NoiseInjector;
 
 import java.util.Random;
 
-public class AbsenceNoiseInjector implements NoiseInjector {
+public class AbsenceNoiseInjector extends NoiseInjector {
 
     private double positionProbability = 0.5; // If set to 0, insertion will happen only random in positions; If 1, only sequentially.
     // At the moment head/tail/body probability cannot be set from outside the class.
 
-    public AbsenceNoiseInjector() {
-
-    }
+    public AbsenceNoiseInjector() {}
 
     public AbsenceNoiseInjector(double positionProbability) {
         this.positionProbability = positionProbability;
@@ -20,14 +18,9 @@ public class AbsenceNoiseInjector implements NoiseInjector {
 
     @Override
     public String injectNoise(Trace cleanTrace, int length) {
-        return injectNoise(cleanTrace, length, positionProbability);
-    }
-
-    @Override
-    public String injectNoise(Trace cleanTrace, int length, double probability) {
         String logMessage = "\"position\": ";
         double methodDecider = Math.random();
-        if (methodDecider < probability) {
+        if (methodDecider < positionProbability) {
             logMessage += "\"consecutive\",\n";
             String location = consecutiveActivityRemovalManager(cleanTrace, length);
             logMessage += "\"location\": \"" + location + "\",\n";

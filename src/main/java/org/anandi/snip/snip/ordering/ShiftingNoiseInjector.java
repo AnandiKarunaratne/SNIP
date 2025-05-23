@@ -6,41 +6,45 @@ import java.util.Random;
 
 public class ShiftingNoiseInjector extends OrderingNoiseInjector {
 
+    private double shiftLeftProbability = 0.5; // If 0, only shifted right
+
+    public ShiftingNoiseInjector() {
+    }
+
+    public ShiftingNoiseInjector(double positionProbability, double shiftLeftProbability) {
+        super(positionProbability);
+        this.shiftLeftProbability = shiftLeftProbability;
+    }
+
     @Override
-    public String injectNoise(Trace cleanTrace, int length, double probability) {
+    public String injectNoise(Trace cleanTrace, int length) {
         String logMessage = "\"position\": ";
         double methodDecider = Math.random();
-        if (methodDecider < probability) {
+        if (methodDecider < super.getPositionProbability()) {
             logMessage += "\"random\",\n";
             shiftActivitiesRandomly(cleanTrace, length);
         } else {
             logMessage += "\"consecutive\",\n";
-            shiftActivitiesConsecutively(cleanTrace, length);
+            logMessage += shiftActivitiesConsecutively(cleanTrace, length);
         }
         return logMessage;
     }
 
-    public String shiftActivitiesRandomly(Trace cleanTrace, int length) {
-        String logMessage = "\"direction\": ";
-        double probability = 0.5; // similar probability to shift left or right
+    public void shiftActivitiesRandomly(Trace cleanTrace, int length) {
         for (int i = 0; i < length; i++) {
             double methodDecider = Math.random();
-            if (methodDecider < probability) {
+            if (methodDecider < shiftLeftProbability) {
                 shiftActivitiesToLeft(cleanTrace, 1);
-                logMessage += "\"left\",\n";
             } else {
                 shiftActivitiesToRight(cleanTrace, 1);
-                logMessage += "\"right\",\n";
             }
         }
-        return logMessage;
     }
 
     public String shiftActivitiesConsecutively(Trace cleanTrace, int length) {
         String logMessage = "\"direction\": ";
-        double probability = 0.5; // similar probability to shift left or right
         double methodDecider = Math.random();
-        if (methodDecider < probability) {
+        if (methodDecider < shiftLeftProbability) {
             shiftActivitiesToLeft(cleanTrace, length);
             logMessage += "\"left\",\n";
         } else {
