@@ -7,10 +7,20 @@ import java.util.Random;
 
 public class AbsenceNoiseInjector implements NoiseInjector {
 
+    private double positionProbability = 0.5; // If set to 0, insertion will happen only random in positions; If 1, only sequentially.
+    // At the moment head/tail/body probability cannot be set from outside the class.
+
+    public AbsenceNoiseInjector() {
+
+    }
+
+    public AbsenceNoiseInjector(double positionProbability) {
+        this.positionProbability = positionProbability;
+    }
+
     @Override
     public String injectNoise(Trace cleanTrace, int length) {
-        double probability = 0.5; // removing activities consecutively or randomly has equal probability
-        return injectNoise(cleanTrace, length, probability);
+        return injectNoise(cleanTrace, length, positionProbability);
     }
 
     @Override
