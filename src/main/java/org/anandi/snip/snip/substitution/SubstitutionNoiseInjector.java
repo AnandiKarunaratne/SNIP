@@ -4,8 +4,6 @@ import org.anandi.snip.eventlog.Trace;
 import org.anandi.snip.snip.NoiseInjector;
 import org.anandi.snip.snip.absence.AbsenceNoiseInjector;
 import org.anandi.snip.snip.insertion.InsertionNoiseInjector;
-import org.anandi.snip.snip.insertion.ProcessActivityInserter;
-import org.anandi.snip.snip.insertion.UnrelatedActivityInserter;
 
 import java.util.HashSet;
 import java.util.Random;
@@ -13,14 +11,14 @@ import java.util.Set;
 
 public class SubstitutionNoiseInjector implements NoiseInjector {
 
-    private final ProcessActivityInserter processActivityInserter;
-    private final UnrelatedActivityInserter unrelatedActivityInserter;
+    private final InsertionNoiseInjector insertionNoiseInjector;
+//    private final UnrelatedActivityInserter unrelatedActivityInserter;
     private final AbsenceNoiseInjector absenceNoiseInjector;
 
     SubstitutionNoiseInjector(Set<String> activities) {
-        this.processActivityInserter = new ProcessActivityInserter(activities);
+        this.insertionNoiseInjector = new InsertionNoiseInjector(activities);
         this.absenceNoiseInjector = new AbsenceNoiseInjector();
-        this.unrelatedActivityInserter = new UnrelatedActivityInserter(activities);
+//        this.unrelatedActivityInserter = new UnrelatedActivityInserter(activities);
     }
     @Override
     public String injectNoise(Trace cleanTrace, int length) {
@@ -34,7 +32,7 @@ public class SubstitutionNoiseInjector implements NoiseInjector {
         String logMessage = "\"position\": ";
         if (methodDecider < probability) {
             logMessage += "\"consecutive\",\n";
-            logMessage += substituteConsecutiveActivities(cleanTrace, length);
+            substituteConsecutiveActivities(cleanTrace, length);
         } else {
             logMessage += "\"random\",\n";
             substituteRandomActivities(cleanTrace, length);
@@ -58,36 +56,25 @@ public class SubstitutionNoiseInjector implements NoiseInjector {
         }
     }
 
-    public String substituteConsecutiveActivities(Trace cleanTrace, int length) {
+    public void substituteConsecutiveActivities(Trace cleanTrace, int length) {
         if (length > cleanTrace.size()) {
             throw new IllegalArgumentException("The substitution length (" + length + ") should not be larger than the trace length (" + cleanTrace.size() + ").");
         }
         Random random = new Random();
         int startIndex = random.nextInt(cleanTrace.size() - length + 1);
-        return substituteConsecutiveActivities(cleanTrace, length, startIndex);
+        substituteConsecutiveActivities(cleanTrace, length, startIndex);
     }
 
-    public String substituteConsecutiveActivities(Trace cleanTrace, int length, int index) {
+    public void substituteConsecutiveActivities(Trace cleanTrace, int length, int index) {
         if (index > cleanTrace.size() - length) {
             throw new IllegalArgumentException("Unable to substitute a sequence of length " + length + " at the index " + index +  " for the trace size " + cleanTrace.size() + ".");
         }
         Trace baseTrace = new Trace(cleanTrace); // make sure the substitution makes the trace noisy.
 
-        double methodDecider = Math.random();
-        InsertionNoiseInjector insertionNoiseInjector;
-        String logMessage;
-        if (methodDecider < 0.5) {
-            insertionNoiseInjector = processActivityInserter;
-            logMessage = "\"insertion_activity_type\": \"process\",\n";
-        } else {
-            insertionNoiseInjector = unrelatedActivityInserter;
-            logMessage = "\"insertion_activity_type\": \"external\",\n";
-        }
         do {
             absenceNoiseInjector.removeConsecutiveActivities(cleanTrace, length, index);
             insertionNoiseInjector.insertConsecutiveActivities(cleanTrace, length, index);
         } while (cleanTrace.equals(baseTrace));
-        return logMessage;
     }
 
     public void substituteOneActivity(Trace cleanTrace, int index) {

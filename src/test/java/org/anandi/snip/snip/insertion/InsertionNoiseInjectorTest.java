@@ -1,25 +1,75 @@
 package org.anandi.snip.snip.insertion;
 
 import org.anandi.snip.eventlog.Trace;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.*;
 
+import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 
 public class InsertionNoiseInjectorTest {
 
     Set<String> activities = new HashSet<>(Arrays.asList("a", "b", "c", "d"));
-    ProcessActivityInserter processActivityInserter = new ProcessActivityInserter(activities);
+    InsertionNoiseInjector insertionNoiseInserter = new InsertionNoiseInjector(activities);
     Trace baseTrace = new Trace(Arrays.asList("a", "b", "c", "a", "b", "d"));
     Trace cleanTrace = new Trace(baseTrace);
+
+    @Test
+    public void testManualSequentialProcessInsertion() {
+        Random random = new Random();
+        int length = random.nextInt(cleanTrace.size() / 3) + 1;
+
+        InsertionNoiseInjector sequentialProcessInserter = new InsertionNoiseInjector(activities, 1, 1);
+        sequentialProcessInserter.injectNoise(cleanTrace, length);
+        assertEquals(cleanTrace.size(), baseTrace.size() + length);
+        assertTrue(activities.containsAll(cleanTrace)); // only contains process activities
+        assertTrue(isConsecutive()); // is consecutive
+    }
+
+    @Test
+    public void testManualRandomProcessInsertion() {
+        Random random = new Random();
+        int length = random.nextInt(cleanTrace.size() / 3) + 1;
+
+        InsertionNoiseInjector randomProcessInserter = new InsertionNoiseInjector(activities, 0, 1);
+        randomProcessInserter.injectNoise(cleanTrace, length);
+        assertEquals(cleanTrace.size(), baseTrace.size() + length);
+        assertTrue(activities.containsAll(cleanTrace)); // only contains process activities
+        // can't test for random positions
+    }
+
+    @Test
+    public void testManualSequentialUnrelatedInsertion() {
+        Random random = new Random();
+        int length = random.nextInt(cleanTrace.size() / 3) + 1;
+
+        InsertionNoiseInjector sequentialUnrelatedInserter = new InsertionNoiseInjector(activities, 1, 0);
+        sequentialUnrelatedInserter.injectNoise(cleanTrace, length);
+        assertEquals(cleanTrace.size(), baseTrace.size() + length);
+        assertFalse(activities.containsAll(cleanTrace)); // only contains process activities
+        assertTrue(isConsecutive()); // is consecutive
+    }
+
+    @Test
+    public void testManualRandomUnrelatedInsertion() {
+        Random random = new Random();
+        int length = random.nextInt(cleanTrace.size() / 3) + 1;
+
+        InsertionNoiseInjector randomProcessInserter = new InsertionNoiseInjector(activities, 0, 0);
+        randomProcessInserter.injectNoise(cleanTrace, length);
+        assertEquals(cleanTrace.size(), baseTrace.size() + length);
+        assertFalse(activities.containsAll(cleanTrace)); // only contains process activities
+        // can't test for random positions
+    }
 
     @Test
     public void testInjectNoise() {
         Random random = new Random();
         int length = random.nextInt(cleanTrace.size() / 3) + 1;
-        processActivityInserter.injectNoise(cleanTrace, length);
+        insertionNoiseInserter.injectNoise(cleanTrace, length);
         assertEquals(cleanTrace.size(), baseTrace.size() + length);
     }
 
@@ -27,7 +77,12 @@ public class InsertionNoiseInjectorTest {
     public void testInsertRandomConsecutiveActivities() {
         Random random = new Random();
         int length = random.nextInt(cleanTrace.size() / 3) + 1;
-        processActivityInserter.insertConsecutiveActivities(cleanTrace, length);
+        insertionNoiseInserter.insertConsecutiveActivities(cleanTrace, length);
+        assertEquals(cleanTrace.size(), baseTrace.size() + length);
+        assertTrue(isConsecutive());
+    }
+
+    private boolean isConsecutive() {
         boolean isConsecutive = false;
         for (int i = 1; i < baseTrace.size(); i++) {
             List<String> subtrace1 = baseTrace.subList(0, i);
@@ -37,11 +92,37 @@ public class InsertionNoiseInjectorTest {
                 break;
             }
         }
-        assertTrue(isConsecutive);
+        return isConsecutive;
     }
 
     private boolean isSubtracePresent(Trace trace, List<String> subtrace) {
         return Collections.indexOfSubList(trace, subtrace) != -1;
+    }
+
+    @Test
+    public void testInjectProcessActivity() {
+        Random random = new Random();
+        int insertIndex = random.nextInt(cleanTrace.size()) + 1;
+        insertionNoiseInserter.injectProcessActivity(cleanTrace, insertIndex);
+        assertEquals(cleanTrace.size(), baseTrace.size() + 1);
+        Assert.assertTrue(activities.contains(cleanTrace.get(insertIndex)));
+    }
+
+    @Test
+    public void testDuplicateActivity() {
+        Trace baseTrace = new Trace(Arrays.asList("a", "b", "c"));
+        Trace cleanTrace = new Trace(baseTrace);
+        int insertIndex = 3;
+        insertionNoiseInserter.duplicateActivity(cleanTrace, insertIndex);
+    }
+
+    @Test
+    public void testInjectUnrelatedActivity() {
+        Random random = new Random();
+        int insertIndex = random.nextInt(cleanTrace.size()) + 1;
+        insertionNoiseInserter.injectUnrelatedActivity(cleanTrace, insertIndex);
+        assertEquals(cleanTrace.size(), baseTrace.size() + 1);
+        assertFalse(activities.contains(cleanTrace.get(insertIndex)));
     }
 
 }
