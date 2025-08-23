@@ -1,5 +1,7 @@
 package org.anandi.snip.snip;
 
+import org.anandi.snip.LengthMode;
+import org.anandi.snip.ModificationLength;
 import org.anandi.snip.eventlog.EventLog;
 import org.anandi.snip.eventlog.Trace;
 import org.anandi.snip.snip.absence.AbsenceNoiseInjectionManager;
@@ -18,7 +20,7 @@ public class NoiseInjectionManager {
         return logEntry;
     }
 
-    public EventLog generateNoisyLogWithReplacement(EventLog cleanLog, double noiseLevel, Set<NoiseType> noiseTypes) {
+    public EventLog generateNoisyLogWithReplacement(EventLog cleanLog, double noiseLevel, Set<NoiseType> noiseTypes, ModificationLength modificationLength) {
         logEntry += initialLogEntry(cleanLog, noiseLevel);
 
         isNoiseTypesAllowed(noiseTypes);
@@ -33,7 +35,12 @@ public class NoiseInjectionManager {
                 int index = random.nextInt(cleanLog.size());
                 Trace cleanTrace = cleanLog.get(index);
 
-                int bound = Math.max(1, cleanTrace.size() / 3);
+                int bound;
+                if (modificationLength.getLengthMode().equals(LengthMode.FRACTION_OF_TRACE_LENGTH)) {
+                    bound = Math.max(1, cleanTrace.size() / modificationLength.getLength());
+                } else {
+                    bound = Math.max(1, modificationLength.getLength()); // making sure at least one alteration will be made
+                }
                 int length = random.nextInt(bound) + 1;
                 generateNoisyTrace(cleanTrace, length, noiseTypes);
             } catch (IllegalArgumentException e) {
@@ -45,7 +52,7 @@ public class NoiseInjectionManager {
         return cleanLog;
     }
 
-    public EventLog generateNoisyLogWithoutReplacement(EventLog cleanLog, double noiseLevel, Set<NoiseType> noiseTypes) {
+    public EventLog generateNoisyLogWithoutReplacement(EventLog cleanLog, double noiseLevel, Set<NoiseType> noiseTypes, ModificationLength modificationLength) {
         logEntry += initialLogEntry(cleanLog, noiseLevel);
 
         isNoiseTypesAllowed(noiseTypes);
@@ -62,7 +69,12 @@ public class NoiseInjectionManager {
                 int index = random.nextInt(traceRemovedList.size());
                 Trace cleanTrace = traceRemovedList.get(index);
 
-                int bound = Math.max(1, cleanTrace.size() / 3);
+                int bound;
+                if (modificationLength.getLengthMode().equals(LengthMode.FRACTION_OF_TRACE_LENGTH)) {
+                    bound = Math.max(1, cleanTrace.size() / modificationLength.getLength());
+                } else {
+                    bound = Math.max(1, modificationLength.getLength()); // making sure at least one alteration will be made
+                }
                 int length = random.nextInt(bound) + 1;
                 generateNoisyTrace(cleanTrace, length, noiseTypes);
 
@@ -87,8 +99,8 @@ public class NoiseInjectionManager {
         }
     }
 
-    public EventLog generateNoisyLogWithoutReplacement(EventLog cleanLog, double noisePercentage) {
-        return generateNoisyLogWithoutReplacement(cleanLog, noisePercentage, getNoiseTypes());
+    public EventLog generateNoisyLogWithoutReplacement(EventLog cleanLog, double noisePercentage, ModificationLength modificationLength) {
+        return generateNoisyLogWithoutReplacement(cleanLog, noisePercentage, getNoiseTypes(), modificationLength);
     }
 
     public String generateNoisyTrace(Trace cleanTrace, int length, Set<NoiseType> noiseTypeSet) { // set to ensure no duplicates

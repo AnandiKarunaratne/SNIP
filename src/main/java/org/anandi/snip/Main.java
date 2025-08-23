@@ -18,10 +18,13 @@ import java.util.stream.Collectors;
 public class Main {
 
     private static final Set<NoiseType> NOISE_TYPES = new HashSet<>();
-    private static EventLog CLEAN_LOG = null;
-    private static double NOISE_LEVEL = 0.0;
 
     public static void main(String[] args) {
+
+        EventLog cleanLog = null;
+        ModificationLength modificationLength = new ModificationLength(LengthMode.FIXED_LENGTH, 1);
+        int modificationLengthForFractionLengthMode = 3; // default value for the other length mode
+
         // stop libraries from printing out "INFO" and "WARNING" logs to console
         Logger logger = Logger.getLogger("");
         logger.setLevel(Level.SEVERE);
@@ -43,6 +46,8 @@ public class Main {
             Option substitution = Option.builder("s").longOpt("substitution").numberOfArgs(0).required(false).desc("inject substitution noise").hasArg(false).build();
             Option log		    = Option.builder("l").longOpt("log").hasArg(true).optionalArg(false).valueSeparator('=').argName("file path").required(false).desc("clean event log").build();
             Option noiseLevel   = Option.builder("n").longOpt("noise-level").hasArg(true).optionalArg(false).valueSeparator('=').argName("percentage").required(false).desc("noise level percentage").build();
+            Option samplingMode = Option.builder("m").longOpt("sampling-mode").hasArg(true).optionalArg(false).valueSeparator('=').argName("sampling mode").required(false).desc("sampling mode: with replacement (wr) or without replacement (wor)").build();
+            Option numAlts      = Option.builder("k").longOpt("num-alts").hasArg(true).optionalArg(false).valueSeparator('=').argName("maximum number of alterations").required(false).desc("maximum number of alterations made in a trace: +k for the exact number, -k for 1/k of the trace size").build();
 
             options.addOption(help);
             options.addOption(version);
@@ -53,6 +58,8 @@ public class Main {
             options.addOption(substitution);
             options.addOption(log);
             options.addOption(noiseLevel);
+            options.addOption(samplingMode);
+            options.addOption(numAlts);
 
             CommandLine cmd = parser.parse(options, args);
             boolean isQuiet = false;
@@ -74,7 +81,7 @@ public class Main {
                         throw new ParseException("Wrong input format");
                     } else {
                         System.out.println("Reading event log: " + inputFilePath + "\n");
-                        CLEAN_LOG = new EventLogUtils().readXES(inputFilePath);
+                        cleanLog = new EventLogUtils().readXES(inputFilePath);
                     }
                 }
 
@@ -112,14 +119,36 @@ public class Main {
                 if (cmd.hasOption(noiseLevel)) {
                     noisePercentage = Double.parseDouble(cmd.getOptionValue(noiseLevel));
                     noiseDescText += noisePercentage;
-                    NOISE_LEVEL = noisePercentage / 100;
+                }
+
+                if (cmd.hasOption(numAlts)) {
+                    String alterations = cmd.getOptionValue(numAlts);
+                    if (alterations.charAt(0) == '+') {
+                        System.out.println("num alts +k detected" + numAlts);
+                        if (alterations.length() > 1) {
+                            modificationLength = new ModificationLength(LengthMode.FIXED_LENGTH, Integer.parseInt(alterations.substring(1)));
+                        }
+                    } else if (alterations.charAt(0) == '-'){
+                        System.out.println("num alts -k detected" + numAlts);
+                        if (alterations.length() > 1) {
+                            modificationLength = new ModificationLength(LengthMode.FRACTION_OF_TRACE_LENGTH, Integer.parseInt(alterations.substring(1)));
+                        } else {
+                            modificationLength = new ModificationLength(LengthMode.FRACTION_OF_TRACE_LENGTH, modificationLengthForFractionLengthMode);
+                        }
+                    }
                 }
 
                 String noiseTypesString = NOISE_TYPES.stream().map(NoiseType::name).collect(Collectors.joining(", "));
                 System.out.println("================================================================================\n" +
                         "Injecting " + noisePercentage + "% noise to the event log with noise types: " + noiseTypesString + ".\n");
                 NoiseInjectionManager noiseInjectionManager= new NoiseInjectionManager();
-                EventLog noisyLog = noiseInjectionManager.generateNoisyLogWithReplacement(CLEAN_LOG, NOISE_LEVEL, NOISE_TYPES);
+                EventLog noisyLog;
+                if (cmd.hasOption(samplingMode) && cmd.getOptionValue(samplingMode).equals("wor")) {
+                    noisyLog = noiseInjectionManager.generateNoisyLogWithoutReplacement(cleanLog, noisePercentage / 100, NOISE_TYPES, modificationLength);
+                } else {
+                    noisyLog = noiseInjectionManager.generateNoisyLogWithReplacement(cleanLog, noisePercentage / 100, NOISE_TYPES, modificationLength);
+                }
+
                 String outputFilePath = extractFolderPath(inputFilePath) + "/" + extractFileNameWithoutExtension(inputFilePath) + "-noise-" + noiseDescText + ".xes";
                 System.out.println("================================================================================\n\n" +
                         "Writing noise injected event log: " + outputFilePath);
