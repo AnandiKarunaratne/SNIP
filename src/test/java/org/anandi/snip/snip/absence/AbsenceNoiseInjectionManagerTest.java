@@ -22,4 +22,10 @@ public class AbsenceNoiseInjectionManagerTest {
         assertEquals(baseTrace.size() - length, cleanTrace.size());
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testRemoveOneActivity() {
+        int length = 1;
+        absenceNoiseInjectionManager.generateNoisyTrace(new Trace(Arrays.asList("a")), length);
+    }
+
 }
