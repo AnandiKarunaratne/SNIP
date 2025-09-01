@@ -1,6 +1,7 @@
 package org.anandi.snip.snip.absence;
 
 import org.anandi.snip.eventlog.Trace;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -20,20 +21,55 @@ public class AbsenceNoiseInjectorTest {
     Random random = new Random();
 
     @Test
+    public void testDefaultConstructor() {
+        AbsenceNoiseInjector injector = new AbsenceNoiseInjector();
+        // use reflection or getter if available, since positionProbability is private
+        double value = getPrivateField(injector, "positionProbability");
+        assertEquals(0.5, value, 0.01);
+    }
+
+    @Test
+    public void testParameterizedConstructor() {
+        AbsenceNoiseInjector injector = new AbsenceNoiseInjector(0.8);
+        double value = getPrivateField(injector, "positionProbability");
+        assertEquals(0.8, value, 0.01);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testRemoveLengthLargerThanTraceSize() {
+        absenceNoiseInjector.injectNoise(new Trace(Arrays.asList("a")), 2);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testRemoveLengthEqualToTraceSize() {
+        absenceNoiseInjector.injectNoise(new Trace(Arrays.asList("a")), 1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testRemovalLengthNegative() {
+        absenceNoiseInjector.injectNoise(baseTrace, -1);
+    }
+
+    @Test
     public void testManualSequentialAbsence() {
         int length = random.nextInt(cleanTrace.size() / 3) + 1;
         AbsenceNoiseInjector sequentialAbsenceNoiseInjector = new AbsenceNoiseInjector(1);
-        sequentialAbsenceNoiseInjector.injectNoise(cleanTrace, length);
-        assertEquals(baseTrace.size() - length, cleanTrace.size());
-        assertTrue(isRemovalConsecutive(baseTrace, cleanTrace));
+        String logMessage = sequentialAbsenceNoiseInjector.injectNoise(cleanTrace, length);
+
+        assertEquals(baseTrace.size() - length, cleanTrace.size()); // length is removed
+        assertTrue(isRemovalConsecutive(baseTrace, cleanTrace)); // consecutive removal
+        assertTrue(logMessage.contains("\"position\": \"consecutive\""));
+        assertTrue(logMessage.contains("head") || logMessage.contains("tail") || logMessage.contains("body"));
     }
 
     @Test
     public void testManualRandomAbsence() {
-        int length = random.nextInt(cleanTrace.size() / 3) + 1;;
+        int length = random.nextInt(cleanTrace.size() / 3) + 1;
         AbsenceNoiseInjector randomAbsenceNoiseInjector = new AbsenceNoiseInjector(0);
-        randomAbsenceNoiseInjector.injectNoise(cleanTrace, length);
+        String logMessage = randomAbsenceNoiseInjector.injectNoise(cleanTrace, length);
+
         assertEquals(baseTrace.size() - length, cleanTrace.size());
+        assertTrue(logMessage.contains("\"position\": \"random\""));
     }
 
     @Test
@@ -45,7 +81,7 @@ public class AbsenceNoiseInjectorTest {
 
     @Test
     public void testRemoveHead() {
-        int length = random.nextInt(cleanTrace.size() / 3) + 1;;
+        int length = random.nextInt(cleanTrace.size() / 3) + 1;
         absenceNoiseInjector.removeHead(cleanTrace, length);
         assertTrue(isRemovalConsecutive(baseTrace, cleanTrace));
         assertTrue(isSubtracePresent(baseTrace, cleanTrace));
@@ -54,7 +90,7 @@ public class AbsenceNoiseInjectorTest {
 
     @Test
     public void testRemoveTail() {
-        int length = random.nextInt(cleanTrace.size() / 3) + 1;;
+        int length = random.nextInt(cleanTrace.size() / 3) + 1;
         absenceNoiseInjector.removeTail(cleanTrace, length);
         assertTrue(isRemovalConsecutive(baseTrace, cleanTrace));
         assertTrue(isSubtracePresent(baseTrace, cleanTrace));
@@ -63,7 +99,7 @@ public class AbsenceNoiseInjectorTest {
 
     @Test
     public void testRemoveBody() {
-        int length = random.nextInt(cleanTrace.size() / 3) + 1;;
+        int length = random.nextInt(cleanTrace.size() / 3) + 1;
         absenceNoiseInjector.removeBody(cleanTrace, length);
         boolean isConsecutive = isRemovalConsecutive(baseTrace, cleanTrace);
         assertTrue(isConsecutive);
@@ -72,7 +108,7 @@ public class AbsenceNoiseInjectorTest {
 
     @Test
     public void testRemoveConsecutiveActivitiesWithoutIndex() {
-        int length = random.nextInt(cleanTrace.size() / 3) + 1;;
+        int length = random.nextInt(cleanTrace.size() / 3) + 1;
         absenceNoiseInjector.removeConsecutiveActivities(cleanTrace, length);
         assertTrue(isRemovalConsecutive(baseTrace, cleanTrace));
     }
@@ -106,6 +142,16 @@ public class AbsenceNoiseInjectorTest {
 
     private boolean isSubtracePresent(Trace trace, List<String> subtrace) {
         return Collections.indexOfSubList(trace, subtrace) != -1;
+    }
+
+    private double getPrivateField(Object obj, String fieldName) {
+        try {
+            java.lang.reflect.Field field = obj.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return (double) field.get(obj);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

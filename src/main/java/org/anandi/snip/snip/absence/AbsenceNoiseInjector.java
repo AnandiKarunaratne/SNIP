@@ -18,7 +18,7 @@ public class AbsenceNoiseInjector extends NoiseInjector {
 
     @Override
     public String injectNoise(Trace cleanTrace, int length) {
-        if (cleanTrace.size() <= length) { // making sure an empty trace will not be generated (log size remains the same)
+        if (cleanTrace.size() <= length || length <= 0) { // making sure an empty trace will not be generated (log size remains the same)
             throw new IllegalArgumentException("trace length shorter than the length selected to remove");
         }
         String logMessage = "\"position\": ";
@@ -29,7 +29,7 @@ public class AbsenceNoiseInjector extends NoiseInjector {
             logMessage += "\"location\": \"" + location + "\",\n";
         } else {
             removeRandomActivities(cleanTrace, length);
-            logMessage += "random\",\n";
+            logMessage += "\"random\",\n";
         }
         return logMessage;
     }
