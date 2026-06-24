@@ -36,7 +36,7 @@ After the build completes, you will find the generated JAR file in the `target` 
 To run the tool, use the following command format:
 
 ```
-java -jar NIP-<version>-jar-with-dependencies.jar <options>
+java -jar SNIP-<version>.jar <options>
 ```
 
 ### Options
@@ -58,7 +58,7 @@ java -jar NIP-<version>-jar-with-dependencies.jar <options>
 1. **Injecting Absence Noise:**
 
   ```
-   java -jar NIP-1.0-SNAPSHOT-jar-with-dependencies.jar -a -l=path/to/event-log.xes -n=10
+   java -jar SNIP-1.0-SNAPSHOT.jar -a -l=path/to/event-log.xes -n=10
    ```
 
    This command injects 10% absence noise into the specified event log.
@@ -66,7 +66,7 @@ java -jar NIP-<version>-jar-with-dependencies.jar <options>
 2. **Injecting Multiple Noise Types:**
 
    ```
-   java -jar NIP-1.0-SNAPSHOT-jar-with-dependencies.jar -a -i -o -s -l=path/to/event-log.xes -n=20
+   java -jar SNIP-1.0-SNAPSHOT.jar -a -i -o -s -l=path/to/event-log.xes -n=20
    ```
 
    This command injects 20% of all specified noise types (absence, insertion, ordering, substitution) into the event log.
@@ -74,13 +74,13 @@ java -jar NIP-<version>-jar-with-dependencies.jar <options>
    An alternative to injecting all noise types would be not specifying the noise types.
    
   ```
-   java -jar NIP-1.0-SNAPSHOT-jar-with-dependencies.jar -l=path/to/event-log.xes -n=20
+   java -jar SNIP-1.0-SNAPSHOT.jar -l=path/to/event-log.xes -n=20
    ```
 
 4. **Suppressing Output:**
 
    ```
-   java -jar NIP-1.0-SNAPSHOT-jar-with-dependencies.jar -q -l=path/to/event-log.xes -n=15 -a
+   java -jar SNIP-1.0-SNAPSHOT.jar -q -l=path/to/event-log.xes -n=15 -a
    ```
 
    This command injects 15% absence noise and suppresses the output.
